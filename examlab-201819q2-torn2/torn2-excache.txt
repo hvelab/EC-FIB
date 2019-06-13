@@ -1,0 +1,53 @@
+####################################################################
+###### NOM I COGNOMS: owo
+####################################################################
+
+Contesta les següents preguntes considerant que la memòria cache és de correspondència directa, que conté 4 blocs de 4 words cada un i que la política d’escriptura és immediata amb assignació:
+
+a) Quants encerts i fallades es produeixen en els accessos a A, B i C?
+
+                A[]   B[]  C[]     
+   ------------------------------------
+   Encerts     = 9  = 0   = 0 
+   Fallades    = 3  = 16  = 16
+
+b) Suposant la configuració inicial, sense variar la mida de bloc, què passaria amb una cache amb el doble de capacitat (128 bytes)? Justifica breument la resposta.
+
+                A[]   B[]  C[]     
+   ------------------------------------
+   Encerts     = 9   = 12  = 12  
+   Fallades    = 3   =  4  =  4 
+ 
+   Justificació: Amb el doble de capacitat, dóna lloc obviament al doble de blocs. Les variables d''aquest examen són 
+   vectors de int, el A ocupa 12 words, el B 16 i el C uns altres 16. Amb la cache que tenim, cada línia pot guardar fins a 
+   4 words, és a dir, hi caben 4 elements de cada vector per línia,
+   per tant el vector A ocuparà 3 blocs, el B 4 i el C 4 també. Al ser una cache amb aquesta capacitat, el índex es calcula segons el byte 2, és a dir els 4 primers bits abans de n-4, segon byte
+   començant pel final en hexa (de 0x10010030 el 3). Si mirem aquest valor % 4 per a veure a quin bloc de la cache
+   correspondria ja que a partir del 3 es reinicia el accés a dalt de tot, veiem que tant 3 % 4 com (índex de la direcció inicial de B) com
+   7 % 4 (índex de la direcció inicial de C) donen mòdul 3 ambdós, entre això i que tenen la mateixa mida cada respectiu vector,
+   avancen igual i per tant sempre es solapen.
+   
+   Però si doblem la capacitat de la cache, tindrem 8 blocs i només entraran en conflicte cada 4 iteracions que és quan es canvia 
+   de línia per proseguir amb el accés sequencial dels vectors ja que en aquest cas el càcul del nº de bloc es faria % 8 
+   i tant 3 % 8 com 7 % 8 donen blocs diferents, i al avançar de la mateixa manera mai es sobreescriuran al mateix bloc,
+   només quan hi hagi un canvi de línia i ja hi hagi un bloc escrit. 
+
+
+c) Suposant la configuració inicial, sense variar el nombre total de blocs ni la mida de bloc, què passaria si en comptes de correspondència directa és una cache amb correspondència associativa per conjunts de 2 vies? Justifica breument la resposta.
+
+                A[]   B[]  C[]     
+   ------------------------------------
+   Encerts     = 9  = 12   = 12 
+   Fallades    = 3  =  4   =  4 
+ 
+   Justificació: La cache té la mateixa capacitat però ara es organitza en conjunts de dos blocs, per tant estarà
+   formada per dos conjunts de dos blocs cadascun, el vector B i el vector C no es solaparan constantment com el primer cas
+   ja que tot i haver de anar teòricament al mateix índex, ara es fa referència a un conjunt, i per tant correspondran al mateix
+   conjunt però no té per què correspondre al mateix bloc, és a dir, s enmagatzemarà al "costat". 
+   És a dir, en la primera iteració A anirà al conjunt 0 i tant B com C aniran al conjunt 1, ara, no es sobreescriuran entre si
+   ja que ambdós corresponen al mateix conjunt, però la cache els organitza un al darrera de l altre, B correspondrà al primer
+   bloc del segon conjunt i C al segon bloc dins del mateix. És per això que no es solapen i aniran iterant com en el cas anterior,
+   només donarà fallada un cop cada quan es vagi a canviar de línia. 
+   
+
+####################################################################
